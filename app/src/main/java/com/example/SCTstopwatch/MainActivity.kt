@@ -1,5 +1,6 @@
 package com.example.SCTstopwatch
 
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ContentValues
@@ -12,8 +13,12 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ListView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -120,10 +125,8 @@ class MainActivity : AppCompatActivity() {
     private fun enableBluetooth() {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
-        if (bluetoothAdapter == null) {
-            // Device doesn't support Bluetooth
+            ?: // Device doesn't support Bluetooth
             return
-        }
         if (!bluetoothAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             enableBluetoothLauncher.launch(enableBtIntent)
@@ -180,41 +183,87 @@ class MainActivity : AppCompatActivity() {
         val minutes = mins % 60
         return String.format("%02d:%02d.%01d", minutes, seconds, millis)
     }
+    private fun showDistanceDialog(onDistanceSelected: (String) -> Unit) {
+        val distances = arrayOf("750m", "1250m", "2000m", "2500m", "Custom")
+        val builder = AlertDialog.Builder(this)
+        val view = layoutInflater.inflate(R.layout.dialog_distance, null)
+        val spinner: Spinner = view.findViewById(R.id.distance_spinner)
+        val customDistanceEditText: EditText = view.findViewById(R.id.custom_distance_edit_text)
+
+        customDistanceEditText.visibility = View.GONE
+
+        spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, distances)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                customDistanceEditText.visibility = if (distances[position] == "Custom") View.VISIBLE else View.GONE
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                customDistanceEditText.visibility = View.GONE
+            }
+        }
+
+        builder.setView(view)
+            .setTitle("Select Race Distance")
+            .setPositiveButton("OK") { dialog, _ ->
+                val selectedDistance = if (spinner.selectedItem == "Custom") {
+                    customDistanceEditText.text.toString()
+                } else {
+                    spinner.selectedItem.toString()
+                }
+                if (selectedDistance.isNotBlank()) {
+                    onDistanceSelected(selectedDistance)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+
+        builder.create().show()
+    }
+
 
     private fun uploadResults() {
-        val resolver = contentResolver
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "lap_times.xlsx")
-            put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-        }
+        showDistanceDialog { selectedDistance ->
+            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault()).format(java.util.Date())
+            val fileName = "${selectedDistance}-${date}.xlsx"
 
-        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+            val resolver = contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            }
 
-        uri?.let {
-            resolver.openOutputStream(it)?.use { outputStream ->
-                val workbook = XSSFWorkbook()
-                val sheet = workbook.createSheet("Lap Times")
-                for ((index, lap) in lapTimes.withIndex()) {
-                    val row = sheet.createRow(index)
-                    val lapData = lap.split("| ")
-                    val cell1 = row.createCell(0)
-                    cell1.setCellValue(lapData[0])
-                    val cell2 = row.createCell(1)
-                    cell2.setCellValue(lapData[1])
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+            uri?.let {
+                resolver.openOutputStream(it)?.use { outputStream ->
+                    val workbook = XSSFWorkbook()
+                    val sheet = workbook.createSheet("Lap Times")
+                    for ((index, lap) in lapTimes.withIndex()) {
+                        val row = sheet.createRow(index)
+                        val lapData = lap.split("| ")
+                        val cell1 = row.createCell(0)
+                        cell1.setCellValue(lapData[0])
+                        val cell2 = row.createCell(1)
+                        cell2.setCellValue(lapData[1])
+                    }
+                    workbook.write(outputStream)
+                    workbook.close()
                 }
-                workbook.write(outputStream)
-                workbook.close()
-            }
 
-            // New code to open the Android share menu
-            val shareIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_STREAM, uri)
-                type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                // New code to open the Android share menu
+                val shareIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(Intent.createChooser(shareIntent, "Share File"))
             }
-            startActivity(Intent.createChooser(shareIntent, "Share File"))
         }
     }
+
+
 }
