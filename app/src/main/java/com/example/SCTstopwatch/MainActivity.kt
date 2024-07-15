@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.os.Vibrator
 import android.provider.MediaStore
 import android.view.View
 import android.widget.AdapterView
@@ -26,7 +27,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.util.ArrayList
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 class MainActivity : AppCompatActivity() {
@@ -140,6 +140,8 @@ class MainActivity : AppCompatActivity() {
         "Stop".also { stopResetButton.text = it }
         stopResetButton.visibility = View.VISIBLE
         "Lap".also { lapResumeButton.text = it }
+        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        v.vibrate(400)
     }
 
     private fun stopTimer() {
@@ -165,6 +167,8 @@ class MainActivity : AppCompatActivity() {
         val lapTime = System.currentTimeMillis() - startTime + timeInMilliseconds
         lapTimes.add("Lap ${lapTimes.size + 1} | ${formatTime(lapTime)}")
         adapter.notifyDataSetChanged()
+        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        v.vibrate(100)
     }
 
 
