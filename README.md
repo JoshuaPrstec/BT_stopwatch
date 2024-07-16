@@ -15,10 +15,12 @@
 ### Windows device
 
 1. On the Windows device, right-click on the desktop and click New -> Shortcut
-2. Type
+2. In the location text field, type the following:
    ```shell
    fsquirt.exe -receive
    ```
+3. Name the file ```shell Blutooth File Receive```
+4. 
 
 ## Usage Guide
 
