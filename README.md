@@ -1,6 +1,6 @@
-#<p align="center">
+<h1 align="center">
 SCT stopwatch
-#</p>
+</h1>
 
 ## Installation
 
