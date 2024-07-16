@@ -9,4 +9,5 @@
     <string name="lap_number">Lap Number</string>
     <string name="lap_time">Lap Time</string>
     <string name="settings">Settings</string>
+    <string name="info">info</string>
 </resources>

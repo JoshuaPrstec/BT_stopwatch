@@ -14,9 +14,11 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import android.provider.MediaStore
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -30,6 +32,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -49,6 +52,27 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences, rootKey)
     }
 }
+
+class InfoActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(android.R.id.content, InfoFragment())
+            .commit()
+    }
+}
+
+class InfoFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.xml.information, container, false)
+    }
+}
+
 
 class MainActivity : AppCompatActivity() {
     private fun isVibrationEnabled(): Boolean {
@@ -122,6 +146,11 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.action_info -> {
+                val intent = Intent(this, InfoActivity::class.java)
                 startActivity(intent)
                 true
             }

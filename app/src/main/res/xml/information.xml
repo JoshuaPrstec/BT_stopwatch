@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:textSize="20sp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="RECORDING RACE\n
+\n
+1. Press Start when the race starts\n
+2. Press Lap for each finishing time\n
+3. Once all times are recorded, press Stop\n
+IMPORTANT: Make sure to lap the last time before pressing Stop\n
+To resume the stopwatch, press Resume\n
+\n
+UPLOADING RESULTS\n
+\n
+1. [Windows only] Double-click on the Bluetooth File Receive app\n
+2. On the Android device, press Upload\n
+3. Select a race distance (or enter a custom distance) and press OK\n
+4. When the share menu appears, press Bluetooth\n
+5. Press the computer name\n
+6. [Windows only] Select the desired download location (Downloads by default)\n
+    [Mac only] The file will be automatically downloaded to the Downloads location\n
+7. Copy the times in the .xlsx file (column B) and paste them into the times column of the master file\n
+\n
+TROUBLESHOOTING\n
+\n
+- To turn vibration on/off, press the settings icon (top right) and toggle the Vibration switch\n
+- If the vibration is not working, ensure touch feedback is enabled (Settings -> Sound and vibration -> Vibration and haptics -> Touch feedback)\n
+- To turn the reset confirmation message on/off, press the settings icon (top right) and toggle the Reset Confirmation switch\n
+- If the computer does not show up in the Bluetooth menu, ensure Bluetooth is on and the Bluetooth File Receive app is running\n
+- To resend an old race.xlsx file, open the Files app on the Android device, press Downloads, and resend the file\n
+" />
+
+</ScrollView>
