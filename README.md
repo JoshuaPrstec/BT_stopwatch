@@ -45,6 +45,7 @@ To resume the stopwatch, press ```Resume```
 
 ### Uploading results
 
-
+1. [Windows only] Double-click on the ```Bluetooth File Receive``` app
+2. 
 
 ## Troubleshooting
