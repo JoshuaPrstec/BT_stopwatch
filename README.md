@@ -53,6 +53,8 @@ To resume the stopwatch, press ```Resume```
 6. [Windows only] Select the desired download location (```Downloads``` by default)
    
    [Mac only] The file will be automatically downloaded to the ```Downloads``` location
-8. Copy the times in the .xlsx file and paste them into the times column of the master file
+8. Copy the times in the .xlsx file (column B) and paste them into the ```times``` column of the master file
 
 ## Troubleshooting
+
+- To turn vibration on/off, press the settings icon (top right) and toggle the ```Vibration``` switch. If the vibration is not working, ensure it is enabled in settings (Settings -> Sound and vibration -> Vibration and haptics -> Touch feedback)
