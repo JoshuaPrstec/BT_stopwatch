@@ -6,10 +6,10 @@ SCT stopwatch
 
 ### Android device
 
-1. Download [latest SCTstopwatch.apk](https://github.com/JoshuaPrstec/SCTstopwatch_1/releases/latest)
-2. Once downloaded, open the files app and press Downloads
+1. Download the [latest SCTstopwatch.apk](https://github.com/JoshuaPrstec/SCTstopwatch_1/releases/latest)
+2. Once downloaded, open the Files app and press ```Downloads```
 3. Press on the SCTstopwatch.apk file
-4. If prompted, allow files to install unknown apps
+4. If prompted, allow Files to install unknown apps
 5. Navigate to the app drawer and locate the SCT stopwatch app
 6. If prompted, allow SCT stopwatch to access nearby devices
 7. Turn Bluetooth on
@@ -27,10 +27,10 @@ SCT stopwatch
 
 #### Mac
 
-1. Go to System Settings
-2. Click General -> Sharing
-3. Turn on Bluetooth Sharing
-4. Click Bluetooth and connect to the Android device
+1. Go to Settings -> General -> Sharing
+2. Turn on Bluetooth Sharing
+3. Go to Settings -> Bluetooth
+4. Connect to the Android device
 
 ## Usage Guide
 
@@ -55,7 +55,7 @@ To resume the stopwatch, press ```Resume```
 6. [Windows only] Select the desired download location (```Downloads``` by default)
    
    [Mac only] The file will be automatically downloaded to the ```Downloads``` location
-7. Copy the times in the .xlsx file (column B) and paste them into the ```times``` column of the master file
+7. On the computer, copy the times in the .xlsx file (column B) and paste them into the ```times``` column of the master file
 
 ## Troubleshooting
 
@@ -65,5 +65,5 @@ To resume the stopwatch, press ```Resume```
 - If the computer does not show up in the Bluetooth menu, ensure Bluetooth is on and the ```Bluetooth File Receive``` app is running
 - To resend an old race.xlsx file, open the ```Files``` app on the Android device, press ```Downloads```, and resend the file
 >[!IMPORTANT]
->To access this guide, press the info icon (```i```) in the top right corner
+>To access this guide in the app, press the info icon (```i```) in the top right corner
 
