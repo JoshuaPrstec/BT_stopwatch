@@ -10,7 +10,7 @@
 4. If prompted, allow files to install unknown apps
 5. Navigate to the app drawer and locate the SCT stopwatch app
 6. If prompted, allow SCT stopwatch to access nearby devices
-   Continue with Windows setup
+7. Turn Bluetooth on
 
 ### Computer
 
@@ -28,10 +28,17 @@
 1. Go to System Settings
 2. Click General -> Sharing
 3. Turn on Bluetooth Sharing
+4. Click Bluetooth and connect to the Android device
 
 ## Usage Guide
 
 ### Recording race
+
+1. Press ```Start``` when the race starts
+2. Press ```Lap``` for each finishing time
+3. Once all times are recorded, press ```Stop```
+>[!IMPORTANT]
+>Make sure
 
 ### Uploading results
 
