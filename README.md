@@ -53,7 +53,7 @@ To resume the stopwatch, press ```Resume```
 6. [Windows only] Select the desired download location (```Downloads``` by default)
    
    [Mac only] The file will be automatically downloaded to the ```Downloads``` location
-8. Copy the times in the .xlsx file (column B) and paste them into the ```times``` column of the master file
+7. Copy the times in the .xlsx file (column B) and paste them into the ```times``` column of the master file
 
 ## Troubleshooting
 
