@@ -12,7 +12,9 @@
 6. If prompted, allow SCT stopwatch to access nearby devices
    Continue with Windows setup
 
-### Windows device
+### Computer
+
+#### Windows
 
 1. On the Windows device, right-click on the desktop and click New -> Shortcut
 2. In the location text field, type the following:
@@ -20,7 +22,10 @@
    fsquirt.exe -receive
    ```
 3. Name the file ```Blutooth File Receive```
-4. 
+
+#### Mac
+
+1. ?
 
 ## Usage Guide
 
