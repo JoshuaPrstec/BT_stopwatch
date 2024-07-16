@@ -16,16 +16,18 @@
 
 #### Windows
 
-1. On the Windows device, right-click on the desktop and click New -> Shortcut
+1. Right-click on the desktop and click New -> Shortcut
 2. In the location text field, type the following:
    ```shell
    fsquirt.exe -receive
    ```
-3. Name the file ```Blutooth File Receive```
+3. Name the file ```Bluetooth File Receive```
 
 #### Mac
 
-1. ?
+1. Go to System Settings
+2. Click General -> Sharing
+3. Turn on Bluetooth Sharing
 
 ## Usage Guide
 
