@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.MediaStore
 import android.view.View
@@ -28,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -141,7 +143,7 @@ class MainActivity : AppCompatActivity() {
         stopResetButton.visibility = View.VISIBLE
         "Lap".also { lapResumeButton.text = it }
         val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        v.vibrate(400)
+        v.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
     private fun stopTimer() {
@@ -168,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         lapTimes.add("Lap ${lapTimes.size + 1} | ${formatTime(lapTime)}")
         adapter.notifyDataSetChanged()
         val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        v.vibrate(100)
+        v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
 
@@ -185,7 +187,7 @@ class MainActivity : AppCompatActivity() {
         val mins = secs / 60
         val seconds = secs % 60
         val minutes = mins % 60
-        return String.format("%02d:%02d.%01d", minutes, seconds, millis)
+        return String.format(getString(R.string._02d_02d_01d), minutes, seconds, millis)
     }
     private fun showDistanceDialog(onDistanceSelected: (String) -> Unit) {
         val distances = arrayOf("750m", "1250m", "2000m", "2500m", "Custom")

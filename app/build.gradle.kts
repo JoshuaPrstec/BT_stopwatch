@@ -71,7 +71,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-        implementation("org.apache.poi:poi:$poiVersion")
-        implementation("org.apache.poi:poi-ooxml:$poiVersion")
+        implementation(libs.poi)
+        implementation(libs.poi.ooxml)
         // Other dependencies...
     }
