@@ -46,6 +46,12 @@ To resume the stopwatch, press ```Resume```
 ### Uploading results
 
 1. [Windows only] Double-click on the ```Bluetooth File Receive``` app
-2. 
+2. On the Android device, press ```Upload```
+3. Select a race distance (or enter a custom distance) and press ```OK```
+4. When the share menu appears, press ```Bluetooth```
+5. Press the computer name
+6. [Windows only] Select the desired download location (```Downloads``` by default)
+   [Mac only] The file will be automatically downloaded to the ```Downloads``` location
+8. Copy the times in the .xlsx file and paste them into the times column of the master file
 
 ## Troubleshooting
