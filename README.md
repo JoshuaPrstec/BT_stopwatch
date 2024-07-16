@@ -37,8 +37,10 @@
 1. Press ```Start``` when the race starts
 2. Press ```Lap``` for each finishing time
 3. Once all times are recorded, press ```Stop```
+
 >[!IMPORTANT]
 >Make sure to lap the last time **before** pressing ```Stop```
+
 To resume the stopwatch, press ```Resume```
 
 ### Uploading results
