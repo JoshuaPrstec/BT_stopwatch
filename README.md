@@ -1,4 +1,4 @@
-# SCTstopwatch
+# SCT stopwatch
 
 ## Installation
 
