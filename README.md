@@ -1,15 +1,15 @@
 # SCTstopwatch_1
 
-##Installation
+## Installation
 
-###Android device
+### Android device
 
-###Windows computer
+### Windows computer
 
-##Guide
+## Guide
 
-###Recording race
+### Recording race
 
-###Uploading results
+### Uploading results
 
-##Troubleshooting
+## Troubleshooting
