@@ -1,12 +1,12 @@
-# SCTstopwatch_1
+# SCTstopwatch
 
 ## Installation
 
 ### Android device
 
-### Windows computer
+### Windows device
 
-## Guide
+## Usage Guide
 
 ### Recording race
 
