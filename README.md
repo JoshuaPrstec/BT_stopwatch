@@ -57,4 +57,11 @@ To resume the stopwatch, press ```Resume```
 
 ## Troubleshooting
 
-- To turn vibration on/off, press the settings icon (top right) and toggle the ```Vibration``` switch. If the vibration is not working, ensure it is enabled in settings (Settings -> Sound and vibration -> Vibration and haptics -> Touch feedback)
+- To turn vibration on/off, press the settings icon (top right) and toggle the ```Vibration``` switch.
+- If the vibration is not working, ensure touch feedback is enabled (Settings -> Sound and vibration -> Vibration and haptics -> Touch feedback)
+- To turn the reset confirmation message on/off, press the settings icon (top right) and toggle the ```Reset Confirmation``` switch
+- If the computer does not show up in the Bluetooth menu, ensure Bluetooth is on and the ```Bluetooth File Receive``` app is running
+- To resend an old race.xlsx file, open the ```Files``` app on the Android device, press ```Downloads```, and resend the file
+>[!IMPORTANT]
+>To access this guide, press the info icon (```i```) in the top right corner
+
