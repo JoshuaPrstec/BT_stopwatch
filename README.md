@@ -15,7 +15,10 @@
 ### Windows device
 
 1. On the Windows device, right-click on the desktop and click New -> Shortcut
-2. 
+2. Type
+   ```shell
+   fsquirt.exe -receive
+   ```
 
 ## Usage Guide
 
