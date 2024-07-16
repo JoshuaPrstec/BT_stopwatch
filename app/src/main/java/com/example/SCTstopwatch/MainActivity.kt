@@ -12,8 +12,10 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.MediaStore
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -28,10 +30,36 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
+class SettingsActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(android.R.id.content, SettingsFragment())
+            .commit()
+    }
+}
+
+class SettingsFragment : PreferenceFragmentCompat() {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setPreferencesFromResource(R.xml.preferences, rootKey)
+    }
+}
 
 class MainActivity : AppCompatActivity() {
+    private fun isVibrationEnabled(): Boolean {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        return sharedPreferences.getBoolean("vibrate_val", true)
+    }
+
+    private fun isResetConfirmationEnabled(): Boolean {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        return sharedPreferences.getBoolean("reset_confirm", true)
+    }
 
     private lateinit var timerTextView: TextView
     private lateinit var stopResetButton: Button
@@ -56,20 +84,16 @@ class MainActivity : AppCompatActivity() {
 
         enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         }
-
         timerTextView = findViewById(R.id.timer)
         stopResetButton = findViewById(R.id.stop_reset_button)
         lapResumeButton = findViewById(R.id.lap_resume_button)
         uploadButton = findViewById(R.id.upload_button)
         lapTimesListView = findViewById(R.id.lap_times)
-
         adapter = LapTimesAdapter(this, lapTimes)
         lapTimesListView.adapter = adapter
-
         stopResetButton.visibility = View.GONE
         "Start".also { lapResumeButton.text = it }
         "00:00.0".also { timerTextView.text = it }
-
         lapResumeButton.setOnClickListener {
             if (isRunning) {
                 recordLap()
@@ -77,7 +101,6 @@ class MainActivity : AppCompatActivity() {
                 startTimer()
             }
         }
-
         stopResetButton.setOnClickListener {
             if (isRunning) {
                 stopTimer()
@@ -85,10 +108,25 @@ class MainActivity : AppCompatActivity() {
                 resetTimer()
             }
         }
-
         uploadButton.setOnClickListener { uploadResults() }
 
         checkAndRequestPermissions()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun checkAndRequestPermissions() {
@@ -142,9 +180,17 @@ class MainActivity : AppCompatActivity() {
         "Stop".also { stopResetButton.text = it }
         stopResetButton.visibility = View.VISIBLE
         "Lap".also { lapResumeButton.text = it }
-        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        v.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+        uploadButton.isEnabled = false // disable the upload button when the race is started
+
+        if (isVibrationEnabled()) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator = vibratorManager.defaultVibrator
+            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
+
     }
+
+
 
     private fun stopTimer() {
         timeInMilliseconds += System.currentTimeMillis() - startTime
@@ -153,26 +199,55 @@ class MainActivity : AppCompatActivity() {
         "Reset".also { stopResetButton.text = it }
         "Resume".also { lapResumeButton.text = it }
         uploadButton.isEnabled = true
+        if (isVibrationEnabled()) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator = vibratorManager.defaultVibrator
+            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
     }
 
     private fun resetTimer() {
-        timeInMilliseconds = 0L
-        "00:00.0".also { timerTextView.text = it }
-        lapTimes.clear()
-        adapter.notifyDataSetChanged()
-        stopResetButton.visibility = View.GONE
-        "Start".also { lapResumeButton.text = it }
-        uploadButton.isEnabled = false
+        if (isResetConfirmationEnabled()) {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Reset Timer")
+            builder.setMessage("Are you sure you want to reset?")
+            builder.setPositiveButton("Yes") { _, _ ->
+                timeInMilliseconds = 0L
+                "00:00.0".also { timerTextView.text = it }
+                lapTimes.clear()
+                adapter.notifyDataSetChanged()
+                stopResetButton.visibility = View.GONE
+                "Start".also { lapResumeButton.text = it }
+                uploadButton.isEnabled = false
+            }
+            builder.setNegativeButton("Cancel") { _, _ ->
+                // Do nothing
+            }
+            val dialog: AlertDialog = builder.create()
+            dialog.show()
+        }
+        else {
+            timeInMilliseconds = 0L
+            "00:00.0".also { timerTextView.text = it }
+            lapTimes.clear()
+            adapter.notifyDataSetChanged()
+            stopResetButton.visibility = View.GONE
+            "Start".also { lapResumeButton.text = it }
+            uploadButton.isEnabled = false
+        }
+
     }
 
     private fun recordLap() {
         val lapTime = System.currentTimeMillis() - startTime + timeInMilliseconds
         lapTimes.add("Lap ${lapTimes.size + 1} | ${formatTime(lapTime)}")
         adapter.notifyDataSetChanged()
-        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+        if (isVibrationEnabled()) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator = vibratorManager.defaultVibrator
+            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
     }
-
 
     private val updateTimerThread: Runnable = object : Runnable {
         override fun run() {
@@ -227,6 +302,7 @@ class MainActivity : AppCompatActivity() {
 
         builder.create().show()
     }
+
 
 
     private fun uploadResults() {

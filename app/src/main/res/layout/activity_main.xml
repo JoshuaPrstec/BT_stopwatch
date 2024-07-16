@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <!-- Large Timer -->
     <TextView
         android:id="@+id/timer"
@@ -19,9 +20,15 @@
     <ListView
         android:id="@+id/lap_times"
         android:layout_width="match_parent"
-        android:layout_height="520dp"
-        android:translationY="55dp" />
-
+        android:layout_height="0dp"
+        android:layout_above="@id/upload_button"
+        android:layout_below="@id/timer"
+        android:layout_marginTop="-40dp"
+        android:layout_marginBottom="0dp"
+        android:clickable="false"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:translationY="-10dp" />
 
     <!-- Upload Button -->
     <Button
@@ -34,7 +41,7 @@
         android:enabled="false"
         android:text="@string/upload"
         android:textSize="24sp"
-        android:translationY="10dp" />
+        android:translationY="-10dp" />
 
     <!-- Bottom Buttons Layout -->
     <LinearLayout
@@ -48,7 +55,7 @@
         <Button
             android:id="@+id/stop_reset_button"
             android:layout_width="0dp"
-            android:layout_height="90dp"
+            android:layout_height="110dp"
             android:layout_weight="1"
             android:text="@string/stop"
             android:textSize="24sp"
@@ -58,10 +65,13 @@
         <Button
             android:id="@+id/lap_resume_button"
             android:layout_width="0dp"
-            android:layout_height="90dp"
+            android:layout_height="110dp"
             android:layout_weight="1"
             android:text="@string/start"
             android:textSize="24sp"
             android:visibility="visible" />
+
+
     </LinearLayout>
+
 </RelativeLayout>

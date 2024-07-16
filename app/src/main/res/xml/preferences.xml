@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        android:key="vibrate_val"
+        android:title="Vibration"
+        android:summary="Toggle vibration on race start, lap and stop"
+        android:defaultValue="true" />
+    <SwitchPreferenceCompat
+        android:key="reset_confirm"
+        android:title="Reset Confirmation"
+        android:summary="Toggle confirmation message when reset pressed"
+        android:defaultValue="true" />
+</PreferenceScreen>
