@@ -19,7 +19,7 @@
    ```shell
    fsquirt.exe -receive
    ```
-3. Name the file ```shell Blutooth File Receive```
+3. Name the file ```Blutooth File Receive```
 4. 
 
 ## Usage Guide
