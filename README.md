@@ -1,4 +1,6 @@
+<p align="center">
 # SCT stopwatch
+</p>
 
 ## Installation
 
