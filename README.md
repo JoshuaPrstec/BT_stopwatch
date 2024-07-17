@@ -53,7 +53,7 @@ To resume the stopwatch, press ```Resume```
 3. Select a race distance (or enter a custom distance) and press ```OK```
 4. When the share menu appears, press ```Bluetooth```
 5. Press the computer name
-6. [Windows only] Select the desired download location (```Downloads``` by default)
+6. [Windows only] Select the desired download location
    
    [Mac only] The file will be automatically downloaded to the ```Downloads``` location
 7. On the computer, copy the times in the .xlsx file (column B) and paste them into the ```times``` column of the master file
