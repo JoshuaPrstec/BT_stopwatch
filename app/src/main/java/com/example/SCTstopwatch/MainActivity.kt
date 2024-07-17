@@ -7,26 +7,10 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
-import android.os.Looper
-import android.os.VibrationEffect
-import android.os.VibratorManager
+import android.os.*
 import android.provider.MediaStore
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.view.*
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import java.io.File
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,11 +53,9 @@ class InfoFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.information, container, false)
     }
 }
-
 
 class MainActivity : AppCompatActivity() {
     private fun isVibrationEnabled(): Boolean {
@@ -106,8 +89,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                // Bluetooth has been enabled
+            }
         }
+
         timerTextView = findViewById(R.id.timer)
         stopResetButton = findViewById(R.id.stop_reset_button)
         lapResumeButton = findViewById(R.id.lap_resume_button)
@@ -116,8 +103,8 @@ class MainActivity : AppCompatActivity() {
         adapter = LapTimesAdapter(this, lapTimes)
         lapTimesListView.adapter = adapter
         stopResetButton.visibility = View.GONE
-        "Start".also { lapResumeButton.text = it }
-        "00:00.0".also { timerTextView.text = it }
+        lapResumeButton.text = "Start"
+        timerTextView.text = "00:00.0"
         lapResumeButton.setOnClickListener {
             if (isRunning) {
                 recordLap()
@@ -162,8 +149,7 @@ class MainActivity : AppCompatActivity() {
         val permissions = arrayOf(
             android.Manifest.permission.BLUETOOTH,
             android.Manifest.permission.BLUETOOTH_ADMIN,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-            android.Manifest.permission.BLUETOOTH_SCAN
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
         val permissionsToRequest = permissions.filter {
@@ -173,7 +159,6 @@ class MainActivity : AppCompatActivity() {
         if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSIONS)
         } else {
-            // Permissions are already granted, proceed with Bluetooth operations
             enableBluetooth()
         }
     }
@@ -182,23 +167,29 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSIONS) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                // All permissions are granted, proceed with Bluetooth operations
                 enableBluetooth()
             } else {
-                // Permissions are denied, show a message to the user
                 Toast.makeText(this, "Permissions are required for Bluetooth operations", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun enableBluetooth() {
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        val bluetoothAdapter = bluetoothManager.adapter
-            ?: // Device doesn't support Bluetooth
-            return
-        if (!bluetoothAdapter.isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            enableBluetoothLauncher.launch(enableBtIntent)
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.BLUETOOTH, android.Manifest.permission.BLUETOOTH_ADMIN), REQUEST_PERMISSIONS)
+        } else {
+            try {
+                val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                val bluetoothAdapter = bluetoothManager.adapter
+                    ?: return
+                if (!bluetoothAdapter.isEnabled) {
+                    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    enableBluetoothLauncher.launch(enableBtIntent)
+                }
+            } catch (e: SecurityException) {
+                Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -206,32 +197,37 @@ class MainActivity : AppCompatActivity() {
         startTime = System.currentTimeMillis()
         handler.postDelayed(updateTimerThread, 0)
         isRunning = true
-        "Stop".also { stopResetButton.text = it }
+        stopResetButton.text = "Stop"
         stopResetButton.visibility = View.VISIBLE
-        "Lap".also { lapResumeButton.text = it }
-        uploadButton.isEnabled = false // disable the upload button when the race is started
+        lapResumeButton.text = "Lap"
+        uploadButton.isEnabled = false
 
         if (isVibrationEnabled()) {
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            val vibrator = vibratorManager.defaultVibrator
-            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(400)
+            }
         }
-
     }
-
-
 
     private fun stopTimer() {
         timeInMilliseconds += System.currentTimeMillis() - startTime
         handler.removeCallbacks(updateTimerThread)
         isRunning = false
-        "Reset".also { stopResetButton.text = it }
-        "Resume".also { lapResumeButton.text = it }
+        stopResetButton.text = "Reset"
+        lapResumeButton.text = "Resume"
         uploadButton.isEnabled = true
         if (isVibrationEnabled()) {
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            val vibrator = vibratorManager.defaultVibrator
-            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(400)
+            }
         }
     }
 
@@ -242,39 +238,33 @@ class MainActivity : AppCompatActivity() {
             builder.setMessage("Are you sure you want to reset?")
             builder.setPositiveButton("Yes") { _, _ ->
                 timeInMilliseconds = 0L
-                "00:00.0".also { timerTextView.text = it }
+                timerTextView.text = "00:00.0"
                 lapTimes.clear()
                 adapter.notifyDataSetChanged()
                 stopResetButton.visibility = View.GONE
-                "Start".also { lapResumeButton.text = it }
+                lapResumeButton.text = "Start"
                 uploadButton.isEnabled = false
             }
-            builder.setNegativeButton("Cancel") { _, _ ->
-                // Do nothing
-            }
+            builder.setNegativeButton("Cancel") { _, _ -> }
             val dialog: AlertDialog = builder.create()
             dialog.show()
-        }
-        else {
+        } else {
             timeInMilliseconds = 0L
-            "00:00.0".also { timerTextView.text = it }
+            timerTextView.text = "00:00.0"
             lapTimes.clear()
             adapter.notifyDataSetChanged()
             stopResetButton.visibility = View.GONE
-            "Start".also { lapResumeButton.text = it }
+            lapResumeButton.text = "Start"
             uploadButton.isEnabled = false
         }
-
     }
-
     private fun recordLap() {
         val lapTime = System.currentTimeMillis() - startTime + timeInMilliseconds
         lapTimes.add("Lap ${lapTimes.size + 1} | ${formatTime(lapTime)}")
         adapter.notifyDataSetChanged()
         if (isVibrationEnabled()) {
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            val vibrator = vibratorManager.defaultVibrator
-            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            vibrator.vibrate(100)
         }
     }
 
@@ -285,6 +275,7 @@ class MainActivity : AppCompatActivity() {
             handler.postDelayed(this, 0)
         }
     }
+
     private fun formatTime(time: Long): String {
         val millis = (time % 1000) / 100
         val secs = (time / 1000).toInt()
@@ -293,6 +284,7 @@ class MainActivity : AppCompatActivity() {
         val minutes = mins % 60
         return String.format(getString(R.string._02d_02d_01d), minutes, seconds, millis)
     }
+
     private fun showDistanceDialog(onDistanceSelected: (String) -> Unit) {
         val distances = arrayOf("750m", "1250m", "2000m", "2500m", "Custom")
         val builder = AlertDialog.Builder(this)
@@ -302,11 +294,19 @@ class MainActivity : AppCompatActivity() {
 
         customDistanceEditText.visibility = View.GONE
 
-        spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, distances)
+        spinner.adapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, distances)
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                customDistanceEditText.visibility = if (distances[position] == "Custom") View.VISIBLE else View.GONE
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                customDistanceEditText.visibility =
+                    if (distances[position] == "Custom") View.VISIBLE else View.GONE
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -332,21 +332,26 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-
-
     private fun uploadResults() {
         showDistanceDialog { selectedDistance ->
-            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault()).format(java.util.Date())
+            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault())
+                .format(java.util.Date())
             val fileName = "${selectedDistance}-${date}.xlsx"
+            val downloadsDirectory =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val file = File(downloadsDirectory, fileName)
 
-            val resolver = contentResolver
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                put(
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+                put(MediaStore.MediaColumns.DATA, file.absolutePath)
             }
 
-            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+            val resolver = contentResolver
+            val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
 
             uri?.let {
                 resolver.openOutputStream(it)?.use { outputStream ->
@@ -375,6 +380,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }
+
