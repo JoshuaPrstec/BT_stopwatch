@@ -7,7 +7,7 @@
         android:defaultValue="true" />
     <SwitchPreferenceCompat
         android:key="reset_confirm"
-        android:title="Reset Confirmation"
-        android:summary="Toggle confirmation message when reset pressed"
+        android:title="Reset Confirmation Message"
+        android:summary="Toggle the Reset Race confirmation message"
         android:defaultValue="true" />
 </PreferenceScreen>

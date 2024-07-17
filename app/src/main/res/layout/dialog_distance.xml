@@ -16,6 +16,7 @@
         android:id="@+id/custom_distance_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints=""
         android:hint="@string/enter_custom_distance"
         android:inputType="text"
         android:visibility="gone" />

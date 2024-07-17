@@ -69,7 +69,7 @@ class InfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.xml.information, container, false)
+        return inflater.inflate(R.layout.information, container, false)
     }
 }
 

@@ -1,3 +1,4 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <h1 align="center">
 SCT stopwatch
 </h1>
