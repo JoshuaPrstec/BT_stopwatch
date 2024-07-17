@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.*
 import android.provider.MediaStore
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
@@ -83,6 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_PERMISSIONS = 2
+        private const val TAG = "MainActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,7 +92,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-
+            if (result.resultCode == RESULT_OK) {
+                // Bluetooth has been enabled
+            }
         }
 
         timerTextView = findViewById(R.id.timer)
@@ -144,13 +148,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAndRequestPermissions() {
-        val permissions = arrayOf(
-            android.Manifest.permission.BLUETOOTH,
-            android.Manifest.permission.BLUETOOTH_ADMIN,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
+        val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                android.Manifest.permission.BLUETOOTH,
+                android.Manifest.permission.BLUETOOTH_ADMIN,
+                android.Manifest.permission.BLUETOOTH_SCAN,
+                android.Manifest.permission.BLUETOOTH_CONNECT,
 
-        val permissionsToRequest = permissions.filter {
+            )
+        } else {
+            arrayOf(
+                android.Manifest.permission.BLUETOOTH,
+                android.Manifest.permission.BLUETOOTH_ADMIN,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        }
+
+        val permissionsToRequest = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
 
@@ -165,31 +179,51 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSIONS) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                Log.d(TAG, "All permissions granted")
                 enableBluetooth()
             } else {
+                Log.d(TAG, "Permissions denied")
                 Toast.makeText(this, "Permissions are required for Bluetooth operations", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun enableBluetooth() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.BLUETOOTH, android.Manifest.permission.BLUETOOTH_ADMIN), REQUEST_PERMISSIONS)
+        val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                android.Manifest.permission.BLUETOOTH,
+                android.Manifest.permission.BLUETOOTH_ADMIN,
+                android.Manifest.permission.BLUETOOTH_SCAN,
+                android.Manifest.permission.BLUETOOTH_CONNECT
+            )
+        } else {
+            arrayOf(
+                android.Manifest.permission.BLUETOOTH,
+                android.Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
+
+        val permissionsToRequest = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSIONS)
         } else {
             try {
                 val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-                val bluetoothAdapter = bluetoothManager.adapter
-                    ?: return
+                val bluetoothAdapter = bluetoothManager.adapter ?: return
                 if (!bluetoothAdapter.isEnabled) {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     enableBluetoothLauncher.launch(enableBtIntent)
                 }
             } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException: ${e.message}")
                 Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun startTimer() {
         startTime = System.currentTimeMillis()
@@ -246,6 +280,7 @@ class MainActivity : AppCompatActivity() {
             uploadButton.isEnabled = false
         }
     }
+
     private fun recordLap() {
         val lapTime = System.currentTimeMillis() - startTime + timeInMilliseconds
         lapTimes.add("Lap ${lapTimes.size + 1} | ${formatTime(lapTime)}")
@@ -322,23 +357,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun uploadResults() {
         showDistanceDialog { selectedDistance ->
-            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault())
-                .format(java.util.Date())
-            val fileName = "${selectedDistance}-${date}.xlsx"
-            val downloadsDirectory =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            val file = File(downloadsDirectory, fileName)
-
+            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault()).format(java.util.Date())
+            val baseFileName = "${selectedDistance}-${date}"
+            val fileName = "$baseFileName.xlsx"
+            val resolver = contentResolver
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(
-                    MediaStore.MediaColumns.MIME_TYPE,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-                put(MediaStore.MediaColumns.DATA, file.absolutePath)
+                put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    val downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val file = createUniqueFile(downloadsDirectory, baseFileName, "xlsx")
+                    put(MediaStore.MediaColumns.DATA, file.absolutePath)
+                } else {
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
             }
 
-            val resolver = contentResolver
             val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
 
             uri?.let {
@@ -369,4 +403,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
+    private fun createUniqueFile(directory: File, baseFileName: String, extension: String): File {
+        var file = File(directory, "$baseFileName.$extension")
+        var count = 1
+        while (file.exists()) {
+            file = File(directory, "$baseFileName($count).$extension")
+            count++
+        }
+        return file
+    }
