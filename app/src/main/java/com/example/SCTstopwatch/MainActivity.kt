@@ -90,9 +90,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                // Bluetooth has been enabled
-            }
+
         }
 
         timerTextView = findViewById(R.id.timer)
@@ -103,8 +101,8 @@ class MainActivity : AppCompatActivity() {
         adapter = LapTimesAdapter(this, lapTimes)
         lapTimesListView.adapter = adapter
         stopResetButton.visibility = View.GONE
-        lapResumeButton.text = "Start"
-        timerTextView.text = "00:00.0"
+        lapResumeButton.text = getString(R.string.start)
+        timerTextView.text = getString(R.string._00_00_0)
         lapResumeButton.setOnClickListener {
             if (isRunning) {
                 recordLap()
@@ -197,19 +195,14 @@ class MainActivity : AppCompatActivity() {
         startTime = System.currentTimeMillis()
         handler.postDelayed(updateTimerThread, 0)
         isRunning = true
-        stopResetButton.text = "Stop"
+        stopResetButton.text = getString(R.string.stop)
         stopResetButton.visibility = View.VISIBLE
-        lapResumeButton.text = "Lap"
+        lapResumeButton.text = getString(R.string.lap)
         uploadButton.isEnabled = false
 
         if (isVibrationEnabled()) {
             val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(400)
-            }
+            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
 
@@ -217,17 +210,12 @@ class MainActivity : AppCompatActivity() {
         timeInMilliseconds += System.currentTimeMillis() - startTime
         handler.removeCallbacks(updateTimerThread)
         isRunning = false
-        stopResetButton.text = "Reset"
-        lapResumeButton.text = "Resume"
+        stopResetButton.text = getString(R.string.reset)
+        lapResumeButton.text = getString(R.string.resume)
         uploadButton.isEnabled = true
         if (isVibrationEnabled()) {
             val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(400)
-            }
+            vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
 
@@ -238,11 +226,11 @@ class MainActivity : AppCompatActivity() {
             builder.setMessage("Are you sure you want to reset?")
             builder.setPositiveButton("Yes") { _, _ ->
                 timeInMilliseconds = 0L
-                timerTextView.text = "00:00.0"
+                timerTextView.text = getString(R.string._00_00_0)
                 lapTimes.clear()
                 adapter.notifyDataSetChanged()
                 stopResetButton.visibility = View.GONE
-                lapResumeButton.text = "Start"
+                lapResumeButton.text = getString(R.string.start)
                 uploadButton.isEnabled = false
             }
             builder.setNegativeButton("Cancel") { _, _ -> }
@@ -250,11 +238,11 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         } else {
             timeInMilliseconds = 0L
-            timerTextView.text = "00:00.0"
+            timerTextView.text = getString(R.string._00_00_0)
             lapTimes.clear()
             adapter.notifyDataSetChanged()
             stopResetButton.visibility = View.GONE
-            lapResumeButton.text = "Start"
+            lapResumeButton.text = getString(R.string.start)
             uploadButton.isEnabled = false
         }
     }
