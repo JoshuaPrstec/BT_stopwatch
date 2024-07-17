@@ -7,9 +7,7 @@ SCT stopwatch
 
 ### Android device
 
-
 https://github.com/user-attachments/assets/aaf142b6-0ea3-4e96-bd0b-143aabbad1cb
-
 
 1. Download the [latest SCTstopwatch.apk](https://github.com/JoshuaPrstec/SCTstopwatch_1/releases/latest)
 2. Once downloaded, open the Files app and press ```Downloads```
@@ -23,11 +21,7 @@ https://github.com/user-attachments/assets/aaf142b6-0ea3-4e96-bd0b-143aabbad1cb
 
 #### Windows
 
-<video width="630" height="300" src="https://github.com/user-attachments/assets/0400e831-c064-418d-a1e6-4e6ff457d58f"></video>
-
-
-
-
+https://github.com/user-attachments/assets/0400e831-c064-418d-a1e6-4e6ff457d58f
 
 1. Right-click on the desktop and click New -> Shortcut
 2. In the location text field, type the following:
@@ -47,6 +41,8 @@ https://github.com/user-attachments/assets/aaf142b6-0ea3-4e96-bd0b-143aabbad1cb
 
 ### Recording race
 
+https://github.com/user-attachments/assets/6619201b-3a75-44ba-ba47-7ce7333a0c1c
+
 1. Press ```Start``` when the race starts
 2. Press ```Lap``` for each finishing time
 3. Once all times are recorded, press ```Stop```
@@ -57,6 +53,10 @@ https://github.com/user-attachments/assets/aaf142b6-0ea3-4e96-bd0b-143aabbad1cb
 To resume the stopwatch, press ```Resume```
 
 ### Uploading results
+
+https://github.com/user-attachments/assets/8a8a09b1-96e8-4c8c-9f7e-d7685631e455
+
+https://github.com/user-attachments/assets/e44eb49e-e55c-4e1b-8986-5baf3395cd2e
 
 1. [Windows only] Double-click on the ```Bluetooth File Receive``` app
 2. On the Android device, press ```Upload```
