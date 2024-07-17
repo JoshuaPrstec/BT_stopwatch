@@ -23,7 +23,11 @@ https://github.com/user-attachments/assets/aaf142b6-0ea3-4e96-bd0b-143aabbad1cb
 
 #### Windows
 
-https://github.com/JoshuaPrstec/SCTstopwatch_1/blob/main/Windows%20-%20Installing.mp4
+<video width="630" height="300" src="https://github.com/user-attachments/assets/0400e831-c064-418d-a1e6-4e6ff457d58f"></video>
+
+
+
+
 
 1. Right-click on the desktop and click New -> Shortcut
 2. In the location text field, type the following:
