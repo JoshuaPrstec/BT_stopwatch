@@ -224,8 +224,53 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong("timeInMilliseconds", timeInMilliseconds)
+        outState.putLong("elapsedTime", System.currentTimeMillis() - startTime)
+        outState.putBoolean("isRunning", isRunning)
+        outState.putStringArrayList("lapTimes", ArrayList(lapTimes))
+        outState.putInt("stopResetButtonVisibility", stopResetButton.visibility)
+        outState.putString("stopResetButtonText", stopResetButton.text.toString())
+        outState.putBoolean("uploadButtonEnabled", uploadButton.isEnabled)
+        outState.putString("lapResumeButtonText", lapResumeButton.text.toString())
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        timeInMilliseconds = savedInstanceState.getLong("timeInMilliseconds")
+        val elapsedTime = savedInstanceState.getLong("elapsedTime")
+        isRunning = savedInstanceState.getBoolean("isRunning")
+        lapTimes.clear()
+        lapTimes.addAll(savedInstanceState.getStringArrayList("lapTimes") ?: arrayListOf())
+        stopResetButton.visibility = savedInstanceState.getInt("stopResetButtonVisibility")
+        stopResetButton.text = savedInstanceState.getString("stopResetButtonText")
+        uploadButton.isEnabled = savedInstanceState.getBoolean("uploadButtonEnabled")
+        lapResumeButton.text = savedInstanceState.getString("lapResumeButtonText")
+        if (isRunning) {
+            startTime = System.currentTimeMillis() - elapsedTime
+            handler.postDelayed(updateTimerThread, 0)
+        } else {
+            updateTimer()
+        }
+    }
+
+    private fun updateTimer() {
+        if (isRunning) {
+            val updatedTime = System.currentTimeMillis() - startTime + timeInMilliseconds
+            timerTextView.text = formatTime(updatedTime)
+        } else {
+            timerTextView.text = formatTime(timeInMilliseconds)
+        }
+    }
+    private fun setButtonsEnabled(enabled: Boolean) {
+        stopResetButton.isEnabled = enabled
+        lapResumeButton.isEnabled = enabled
+    }
+
 
     private fun startTimer() {
+        setButtonsEnabled(false)
         startTime = System.currentTimeMillis()
         handler.postDelayed(updateTimerThread, 0)
         isRunning = true
@@ -238,9 +283,11 @@ class MainActivity : AppCompatActivity() {
             val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
         }
+        setButtonsEnabled(true)
     }
 
     private fun stopTimer() {
+        setButtonsEnabled(false)
         timeInMilliseconds += System.currentTimeMillis() - startTime
         handler.removeCallbacks(updateTimerThread)
         isRunning = false
@@ -251,37 +298,53 @@ class MainActivity : AppCompatActivity() {
             val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibrator.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
         }
+        setButtonsEnabled(true)
     }
 
     private fun resetTimer() {
+        setButtonsEnabled(false) // Disable buttons initially
+        uploadButton.isEnabled = false
         if (isResetConfirmationEnabled()) {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Reset Timer")
             builder.setMessage("Are you sure you want to reset?")
             builder.setPositiveButton("Yes") { _, _ ->
-                timeInMilliseconds = 0L
-                timerTextView.text = getString(R.string._00_00_0)
-                lapTimes.clear()
-                adapter.notifyDataSetChanged()
-                stopResetButton.visibility = View.GONE
-                lapResumeButton.text = getString(R.string.start)
-                uploadButton.isEnabled = false
+                resetTimerActions()
+                setButtonsEnabled(true) // Re-enable buttons after reset
             }
-            builder.setNegativeButton("Cancel") { _, _ -> }
+            builder.setNegativeButton("Cancel") { _, _ ->
+                setButtonsEnabled(true) // Re-enable buttons if canceled
+                uploadButton.isEnabled = true
+            }
+
             val dialog: AlertDialog = builder.create()
+
+            // Set a dismiss listener to re-enable buttons when the dialog is dismissed
+            dialog.setOnDismissListener {
+                setButtonsEnabled(true) // Re-enable buttons when dialog is dismissed
+                uploadButton.isEnabled = true
+            }
+
             dialog.show()
         } else {
-            timeInMilliseconds = 0L
-            timerTextView.text = getString(R.string._00_00_0)
-            lapTimes.clear()
-            adapter.notifyDataSetChanged()
-            stopResetButton.visibility = View.GONE
-            lapResumeButton.text = getString(R.string.start)
-            uploadButton.isEnabled = false
+            resetTimerActions()
+            setButtonsEnabled(true) // Re-enable buttons after reset
+            uploadButton.isEnabled = true
         }
     }
 
+    private fun resetTimerActions() {
+        timeInMilliseconds = 0L
+        timerTextView.text = getString(R.string._00_00_0)
+        lapTimes.clear()
+        adapter.notifyDataSetChanged()
+        stopResetButton.visibility = View.GONE
+        lapResumeButton.text = getString(R.string.start)
+        uploadButton.isEnabled = false
+    }
+
     private fun recordLap() {
+        setButtonsEnabled(false)
         val lapTime = System.currentTimeMillis() - startTime + timeInMilliseconds
         lapTimes.add("Lap ${lapTimes.size + 1} | ${formatTime(lapTime)}")
         adapter.notifyDataSetChanged()
@@ -289,6 +352,7 @@ class MainActivity : AppCompatActivity() {
             val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibrator.vibrate(100)
         }
+        setButtonsEnabled(true)
     }
 
     private val updateTimerThread: Runnable = object : Runnable {
@@ -309,6 +373,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDistanceDialog(onDistanceSelected: (String) -> Unit) {
+        setButtonsEnabled(false)
         val distances = arrayOf("750m", "1250m", "2000m", "2500m", "Custom")
         val builder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.dialog_distance, null)
@@ -335,6 +400,7 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 customDistanceEditText.visibility = View.GONE
             }
+
         }
 
         builder.setView(view)
@@ -348,11 +414,18 @@ class MainActivity : AppCompatActivity() {
                 if (selectedDistance.isNotBlank()) {
                     onDistanceSelected(selectedDistance)
                 }
+                setButtonsEnabled(true)
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                setButtonsEnabled(true)
+                dialog.cancel() }
+        val dialog: AlertDialog = builder.create()
 
-        builder.create().show()
+        dialog.setOnDismissListener {
+            setButtonsEnabled(true) // Re-enable buttons when dialog is dismissed
+        }
+        dialog.show()
     }
 
     private fun uploadResults() {
@@ -371,6 +444,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
+
             }
 
             val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
