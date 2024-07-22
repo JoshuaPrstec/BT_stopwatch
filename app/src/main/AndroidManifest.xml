@@ -9,9 +9,9 @@
 
 
     <application
-        android:icon="@mipmap/sct_launcher"
+        android:icon="@mipmap/bt_stop_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/sct_launcher_round"
+        android:roundIcon="@mipmap/bt_stop_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 

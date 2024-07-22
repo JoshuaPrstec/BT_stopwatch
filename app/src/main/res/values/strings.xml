@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SCT stopwatch</string>
+    <string name="app_name">BT stopwatch</string>
     <string name="_02d_02d_01d">%02d:%02d.%01d</string>
     <string name="_00_00_0">00:00.0</string>
     <string name="upload">Upload</string>

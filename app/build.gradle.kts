@@ -1,4 +1,4 @@
-val poiVersion = "5.2.2" // Use the latest version of Apache POI
+val poiVersion = "5.2.2"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -7,11 +7,11 @@ plugins {
 
 android {
 
-    namespace = "com.example.SCTstopwatch"
+    namespace = "com.example.BTstopwatch"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.SCTstopwatch"
+        applicationId = "com.example.BTstopwatch"
         minSdk = 27
         targetSdk = 34
         versionCode = 1
@@ -76,5 +76,4 @@ dependencies {
     implementation(libs.poi)
     implementation(libs.poi.ooxml)
     implementation(libs.androidx.preference.ktx)
-        // Other dependencies...
     }
