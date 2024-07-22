@@ -32,7 +32,6 @@ class SettingsActivity : AppCompatActivity() {
             .commit()
     }
 }
-
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -48,7 +47,6 @@ class InfoActivity : AppCompatActivity() {
             .commit()
     }
 }
-
 class InfoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         return sharedPreferences.getBoolean("reset_confirm", true)
     }
-
     private lateinit var timerTextView: TextView
     private lateinit var stopResetButton: Button
     private lateinit var lapResumeButton: Button
@@ -87,16 +84,14 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        enableBluetoothLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
 
-        enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                // Bluetooth has been enabled
             }
-        }
-
         timerTextView = findViewById(R.id.timer)
         stopResetButton = findViewById(R.id.stop_reset_button)
         lapResumeButton = findViewById(R.id.lap_resume_button)
@@ -122,9 +117,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         uploadButton.setOnClickListener { uploadResults() }
-
         checkAndRequestPermissions()
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -138,11 +133,13 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
                 true
             }
+
             R.id.action_info -> {
                 val intent = Intent(this, InfoActivity::class.java)
                 startActivity(intent)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -154,7 +151,6 @@ class MainActivity : AppCompatActivity() {
                 android.Manifest.permission.BLUETOOTH_ADMIN,
                 android.Manifest.permission.BLUETOOTH_SCAN,
                 android.Manifest.permission.BLUETOOTH_CONNECT,
-
             )
         } else {
             arrayOf(
@@ -163,19 +159,25 @@ class MainActivity : AppCompatActivity() {
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         }
-
         val permissionsToRequest = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-
         if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSIONS)
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsToRequest.toTypedArray(),
+                REQUEST_PERMISSIONS
+            )
         } else {
             enableBluetooth()
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSIONS) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
@@ -183,7 +185,11 @@ class MainActivity : AppCompatActivity() {
                 enableBluetooth()
             } else {
                 Log.d(TAG, "Permissions denied")
-                Toast.makeText(this, "Permissions are required for Bluetooth operations", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Permissions are required for Bluetooth operations",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -202,16 +208,19 @@ class MainActivity : AppCompatActivity() {
                 android.Manifest.permission.BLUETOOTH_ADMIN
             )
         }
-
         val permissionsToRequest = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-
         if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSIONS)
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsToRequest.toTypedArray(),
+                REQUEST_PERMISSIONS
+            )
         } else {
             try {
-                val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                val bluetoothManager =
+                    getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
                 val bluetoothAdapter = bluetoothManager.adapter ?: return
                 if (!bluetoothAdapter.isEnabled) {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -219,7 +228,8 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: SecurityException) {
                 Log.e(TAG, "SecurityException: ${e.message}")
-                Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bluetooth permissions are required", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -329,7 +339,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             resetTimerActions()
             setButtonsEnabled(true) // Re-enable buttons after reset
-            uploadButton.isEnabled = true
         }
     }
 
@@ -374,19 +383,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun showDistanceDialog(onDistanceSelected: (String) -> Unit) {
         setButtonsEnabled(false)
+        uploadButton.isEnabled = false
         val distances = arrayOf("750m", "1250m", "2000m", "2500m", "Custom")
         val builder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.dialog_distance, null)
         val spinner: Spinner = view.findViewById(R.id.distance_spinner)
         val customDistanceEditText: EditText = view.findViewById(R.id.custom_distance_edit_text)
-
         customDistanceEditText.visibility = View.GONE
-
         spinner.adapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, distances)
-
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-
             override fun onItemSelected(
                 parent: AdapterView<*>?,
                 view: View?,
@@ -400,9 +406,7 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 customDistanceEditText.visibility = View.GONE
             }
-
         }
-
         builder.setView(view)
             .setTitle("Select Race Distance")
             .setPositiveButton("OK") { dialog, _ ->
@@ -415,36 +419,43 @@ class MainActivity : AppCompatActivity() {
                     onDistanceSelected(selectedDistance)
                 }
                 setButtonsEnabled(true)
+                uploadButton.isEnabled = true
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 setButtonsEnabled(true)
+                uploadButton.isEnabled = true
                 dialog.cancel() }
         val dialog: AlertDialog = builder.create()
 
         dialog.setOnDismissListener {
             setButtonsEnabled(true) // Re-enable buttons when dialog is dismissed
+            uploadButton.isEnabled = true
         }
         dialog.show()
     }
 
     private fun uploadResults() {
         showDistanceDialog { selectedDistance ->
-            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault()).format(java.util.Date())
+            val date = java.text.SimpleDateFormat("ddMMM", java.util.Locale.getDefault())
+                .format(java.util.Date())
             val baseFileName = "${selectedDistance}-${date}"
             val fileName = "$baseFileName.xlsx"
             val resolver = contentResolver
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                put(
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    val downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val downloadsDirectory =
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                     val file = createUniqueFile(downloadsDirectory, baseFileName, "xlsx")
                     put(MediaStore.MediaColumns.DATA, file.absolutePath)
                 } else {
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
-
             }
 
             val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
@@ -453,13 +464,18 @@ class MainActivity : AppCompatActivity() {
                 resolver.openOutputStream(it)?.use { outputStream ->
                     val workbook = XSSFWorkbook()
                     val sheet = workbook.createSheet("Lap Times")
+                    val createHelper = workbook.creationHelper
+                    val cellStyle = workbook.createCellStyle()
+                    cellStyle.dataFormat = createHelper.createDataFormat().getFormat("mm:ss.0")
+
                     for ((index, lap) in lapTimes.withIndex()) {
                         val row = sheet.createRow(index)
                         val lapData = lap.split("| ")
                         val cell1 = row.createCell(0)
                         cell1.setCellValue(lapData[0])
                         val cell2 = row.createCell(1)
-                        cell2.setCellValue(lapData[1])
+                        cell2.cellStyle = cellStyle
+                        cell2.setCellValue(convertTimeToExcelFormat(lapData[1]))
                     }
                     workbook.write(outputStream)
                     workbook.close()
@@ -476,13 +492,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-}
-    private fun createUniqueFile(directory: File, baseFileName: String, extension: String): File {
-        var file = File(directory, "$baseFileName.$extension")
-        var count = 1
-        while (file.exists()) {
-            file = File(directory, "$baseFileName($count).$extension")
-            count++
-        }
-        return file
+
+    private fun convertTimeToExcelFormat(timeString: String): Double {
+        val parts = timeString.split(":")
+        val minutes = parts[0].toDouble()
+        val secondsMillis = parts[1].split(".")
+        val seconds = secondsMillis[0].toDouble()
+        val millis = secondsMillis[1].toDouble() / 10
+        return (minutes * 60 + seconds + millis) / (24 * 60 * 60)
     }
+}
+
+private fun createUniqueFile(directory: File, baseFileName: String, extension: String): File {
+    var file = File(directory, "$baseFileName.$extension")
+    var count = 1
+    while (file.exists()) {
+        file = File(directory, "$baseFileName($count).$extension")
+        count++
+    }
+    return file
+}
